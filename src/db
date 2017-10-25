@@ -1,7 +1,26 @@
 #!/usr/bin/env bash
 
-# TODO: fix the install script
-# install mysqldump mysql-client
+########################
+# install dependencies #
+########################
+
+command -v mysqldump &>/dev/null || {
+  command -v apt-get &>/dev/null && {
+    sudo apt-get update
+    sudo apt-get install -y -qq mysql-client
+  }
+}
+
+command -v mysql &>/dev/null || {
+  command -v apt-get &>/dev/null && {
+    sudo apt-get update
+    sudo apt-get install -y -qq mysql-client
+  }
+}
+
+############################
+# Fetch required variables #
+############################
 
 # Fetch source server
 if [[ ! $SRC_SERVER ]] ; then
@@ -25,10 +44,13 @@ if [[ ! $SRC_PASS ]] ; then
   echo ""
 fi
 
-# Check what we're supposed to do
+###################################
+# Check what we're supposed to do #
+###################################
+
 case "$1" in
 
-  list) # list tables in the database
+  list) # list databases on the server
     echo "SHOW DATABASES;" | mysql -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" 2>/dev/null | tail -n +2
     ;;
 
@@ -44,7 +66,58 @@ case "$1" in
     echo "SHOW TABLES;" | mysql -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" 2>/dev/null | tail -n +2
     ;;
 
-  copy-table)
+  copy-table) # copy a single table
+
+    # Fetch source database
+    if [[ ! $SRC_DB ]] ; then
+      echo -n "Enter source database [trackthis]: "
+      read SRC_DB
+      [[ -z "$SRC_DB" ]] && SRC_DB=trackthis
+    fi
+
+    # Fetch source table
+    if [[ ! $SRC_TABLE ]] ; then
+      echo -n "Enter source table: "
+      read SRC_TABLE
+      [[ -z "$SRC_TABLE" ]] && SRC_TABLE=trackthis
+    fi
+
+    # Fetch target server
+    if [[ ! $TGT_SERVER ]] ; then
+      echo -n "Enter target server [localhost]: "
+      read TGT_SERVER
+      [[ -z "$TGT_SERVER" ]] && TGT_SERVER=localhost
+    fi
+
+    # Fetch target user
+    if [[ ! $TGT_USER ]] ; then
+      echo -n "Enter target user [admin]: "
+      read TGT_USER
+      [[ -z "$TGT_USER" ]] && TGT_USER=admin
+    fi
+
+    # Fetch target password
+    if [[ ! $TGT_PASS ]] ; then
+      echo -n "Enter target password: "
+      read -s TGT_PASS
+      [[ -z "$TGT_PASS" ]] && TGT_PASS=
+      echo ""
+    fi
+
+    # Fetch target database
+    if [[ ! $TGT_DB ]] ; then
+      echo -n "Enter target database [trackthis]: "
+      read TGT_DB
+      [[ -z "$TGT_DB" ]] && TGT_DB=trackthis
+    fi
+
+    # Actually copy the thing
+    mysqldump -C -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" "${SRC_TABLE}" 2>/dev/null |\
+      mysql -h "${TGT_SERVER}" -u "${TGT_USER}" "--password=${TGT_PASS}" "${TGT_DB}"
+
+    ;;
+
+  copy-all-tables)
 
     # Fetch source database
     if [[ ! $SRC_DB ]] ; then
@@ -82,7 +155,13 @@ case "$1" in
       [[ -z "$TGT_DB" ]] && TGT_DB=trackthis
     fi
 
+    export SRC_SERVER
+    export SRC_USER
+    export SRC_PASS
+    export SRC_DB
+    TABLES=$($0 tables)
 
+    echo $TABLES
 
     ;;
 esac
