@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+# TODO: fix the install script
+# install mysqldump mysql-client
+
+# Fetch source server
+if [[ ! $SRC_SERVER ]] ; then
+  echo -n "Enter source server [localhost]: "
+  read SRC_SERVER
+  [[ -z "$SRC_SERVER" ]] && SRC_SERVER=localhost
+fi
+
+# Fetch source user
+if [[ ! $SRC_USER ]] ; then
+  echo -n "Enter source user [admin]: "
+  read SRC_USER
+  [[ -z "$SRC_USER" ]] && SRC_USER=admin
+fi
+
+# Fetch source password
+if [[ ! $SRC_PASS ]] ; then
+  echo -n "Enter source password: "
+  read -s SRC_PASS
+  [[ -z "$SRC_PASS" ]] && SRC_PASS=
+  echo ""
+fi
+
+# Check what we're supposed to do
+case "$1" in
+
+  list) # list tables in the database
+    echo "SHOW DATABASES;" | mysql -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" 2>/dev/null | tail -n +2
+    ;;
+
+  tables) # list tables in the database
+
+    # Fetch source database
+    if [[ ! $SRC_DB ]] ; then
+      echo -n "Enter source database [trackthis]: "
+      read SRC_DB
+      [[ -z "$SRC_DB" ]] && SRC_DB=trackthis
+    fi
+
+    echo "SHOW TABLES;" | mysql -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" 2>/dev/null | tail -n +2
+    ;;
+
+  copy-table)
+
+    # Fetch source database
+    if [[ ! $SRC_DB ]] ; then
+      echo -n "Enter source database [trackthis]: "
+      read SRC_DB
+      [[ -z "$SRC_DB" ]] && SRC_DB=trackthis
+    fi
+
+    # Fetch target server
+    if [[ ! $TGT_SERVER ]] ; then
+      echo -n "Enter target server [localhost]: "
+      read TGT_SERVER
+      [[ -z "$TGT_SERVER" ]] && TGT_SERVER=localhost
+    fi
+
+    # Fetch target user
+    if [[ ! $TGT_USER ]] ; then
+      echo -n "Enter target user [admin]: "
+      read TGT_USER
+      [[ -z "$TGT_USER" ]] && TGT_USER=admin
+    fi
+
+    # Fetch target password
+    if [[ ! $TGT_PASS ]] ; then
+      echo -n "Enter target password: "
+      read -s TGT_PASS
+      [[ -z "$TGT_PASS" ]] && TGT_PASS=
+      echo ""
+    fi
+
+    # Fetch target database
+    if [[ ! $TGT_DB ]] ; then
+      echo -n "Enter target database [trackthis]: "
+      read TGT_DB
+      [[ -z "$TGT_DB" ]] && TGT_DB=trackthis
+    fi
+
+
+
+    ;;
+esac
