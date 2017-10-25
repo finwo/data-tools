@@ -1,0 +1,13 @@
+{
+    "name": "finwo/data-tools",
+    "authors": [
+        {
+            "name": "Robin Bron",
+            "email": "robin@finwo.nl"
+        }
+    ],
+    "require": {
+        "ext-mysqli": "*",
+        "finwo/punycode": "^0.0.3"
+    }
+}

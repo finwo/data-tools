@@ -1,0 +1,52 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "6319838f520125e57fa71c19a6e1b2a3",
+    "packages": [
+        {
+            "name": "finwo/punycode",
+            "version": "0.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/finwo/php-punycode.git",
+                "reference": "7ba9e6e2e03fcfcf45a4c2e41f8bb024797233bf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/finwo/php-punycode/zipball/7ba9e6e2e03fcfcf45a4c2e41f8bb024797233bf",
+                "reference": "7ba9e6e2e03fcfcf45a4c2e41f8bb024797233bf",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Finwo\\Punycode\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Robin Bron",
+                    "email": "robin@finwo.nl"
+                }
+            ],
+            "time": "2017-03-02T17:06:01+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "ext-mysqli": "*"
+    },
+    "platform-dev": []
+}
