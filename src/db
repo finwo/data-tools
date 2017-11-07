@@ -77,9 +77,14 @@ case "$1" in
 
     # Fetch source table
     if [[ ! $SRC_TABLE ]] ; then
-      echo -n "Enter source table: "
-      read SRC_TABLE
-      [[ -z "$SRC_TABLE" ]] && SRC_TABLE=trackthis
+
+      if [[ $2 ]] ; then
+        SRC_TABLE=$2
+      else
+        echo -n "Enter source table: "
+        read SRC_TABLE
+        [[ -z "$SRC_TABLE" ]] && SRC_TABLE=trackthis
+      fi
     fi
 
     # Fetch target server
@@ -112,8 +117,8 @@ case "$1" in
     fi
 
     # Actually copy the thing
-    mysqldump -C -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" "${SRC_TABLE}" 2>/dev/null |\
-      mysql -h "${TGT_SERVER}" -u "${TGT_USER}" "--password=${TGT_PASS}" "${TGT_DB}"
+    mysqldump -C -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" "${SRC_TABLE}" --quick --skip-triggers --insert-ignore --skip-add-drop-table --skip-lock-tables | pv |\
+      mysql -C -h "${TGT_SERVER}" -u "${TGT_USER}" "--password=${TGT_PASS}" "${TGT_DB}" 2>&1 | grep -v "[Warning] Using a password"
 
     ;;
 
@@ -155,13 +160,21 @@ case "$1" in
       [[ -z "$TGT_DB" ]] && TGT_DB=trackthis
     fi
 
+    # Fetch tables
     export SRC_SERVER
     export SRC_USER
     export SRC_PASS
     export SRC_DB
     TABLES=$($0 tables)
 
-    echo $TABLES
+    # Export targets for child processes
+    export TGT_SERVER
+    export TGT_USER
+    export TGT_PASS
+    export TGT_DB
+
+    # Copy table-for-table
+    echo $TABLES | tr ' ' '\n' | parallel -j3 $0 copy-table {}
 
     ;;
 esac
