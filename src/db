@@ -117,7 +117,10 @@ case "$1" in
     fi
 
     # Actually copy the thing
-    mysqldump -C -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" "${SRC_TABLE}" --quick --no-create-db --skip-triggers --insert-ignore --skip-add-drop-table --skip-lock-tables | pv |\
+    # --no-create-db
+    # --skip-add-drop-table
+    mysqldump -C -h "${SRC_SERVER}" -u "${SRC_USER}" "--password=${SRC_PASS}" "${SRC_DB}" "${SRC_TABLE}" --quick --skip-triggers --insert-ignore --skip-lock-tables | pv |\
+      sed 's/CREATE TABLE/CREATE TABLE IF NOT EXISTS/' |\
       mysql -C -h "${TGT_SERVER}" -u "${TGT_USER}" "--password=${TGT_PASS}" "${TGT_DB}" 2>&1 | grep -v "[Warning] Using a password"
 
     ;;
@@ -174,7 +177,7 @@ case "$1" in
     export TGT_DB
 
     # Copy table-for-table
-    echo $TABLES | tr ' ' '\n' | parallel -j3 $0 copy-table {}
+    echo $TABLES | tr ' ' '\n' | parallel -j2 $0 copy-table {}
 
     ;;
 esac
